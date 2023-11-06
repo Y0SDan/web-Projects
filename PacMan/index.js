@@ -97,9 +97,100 @@ function dibujaPacman() {
         indice = (indice + 1) % 3
     }
 
-    console.log(indice)
+ //   console.log(indice)
 }
 
+/*************************** Phantoms *****************/
+//BLINKY (RED)------------------------------------------------------------------------
+var blinky_x = 0
+var blinky_y = 0
+var indice_blinky = 0            
+var avance_blinky_x = 0   
+var avance_blinky_y = 0   
+var pasos_blinky = -20
+var bx1
+var by1            
+
+let blinkyR = //R -> Right
+    [
+        [1,4,35,38,35,38],    //Derecha
+        [1,54,35,38,35,38]    //Derecha
+    ]
+let blinkyL = //L -> Left
+    [
+        [1,204,35,38,35,38],    //izquierda
+        [1,254,35,38,35,38]     //izquierda
+    ]
+
+function drawBlinky(){
+
+    if(blinky_x == 0 && blinky_y == 0){
+        blinky_x = bx1
+        blinky_y = by1
+    }
+    if(pasos_blinky < 0){
+        ctx.clearRect(blinky_x,blinky_y,35,38)
+        ctx.drawImage(img,blinkyL[indice_blinky][0],blinkyL[indice_blinky][1],blinkyL[indice_blinky][2],blinkyL[indice_blinky][3],blinky_x,blinky_y,blinkyL[indice_blinky][4],blinkyL[indice_blinky][5])
+        indice_blinky = (indice_blinky + 1) % 2
+        avance_blinky_x = 1 * pasos_blinky
+        blinky_x += avance_blinky_x
+    }
+    if(pasos_blinky > 0){
+        ctx.clearRect(blinky_x,blinky_y,35,38)
+        ctx.drawImage(img,blinkyR[indice_blinky][0],blinkyR[indice_blinky][1],blinkyR[indice_blinky][2],blinkyR[indice_blinky][3],blinky_x,blinky_y,blinkyR[indice_blinky][4],blinkyR[indice_blinky][5])
+        indice_blinky = (indice_blinky + 1) % 2
+        avance_blinky_x = 1 * pasos_blinky
+        blinky_x += avance_blinky_x        
+    }
+    
+    
+    if(detectarColisionBlinky()){
+        pasos_blinky = pasos_blinky * (-1)
+    }
+}
+
+function detectarColisionBlinky(){
+    for(let i = 0; i < map.length; i++) {
+        for(let j = 0; j < map[i].length; j++) {
+            if(map[i][j] === '-') {
+                wallX = j * bWidth;
+                wallY = i * bHeight;
+                nextBlinkyX = blinky_x + avance_blinky_x;
+                nextBlinkyY = blinky_y + avance_blinky_y;
+                if(nextBlinkyX < wallX + bWidth && nextBlinkyX + 35 > wallX && nextBlinkyY < wallY + bHeight && nextBlinkyY + 38 > wallY) {
+                    return true;
+                }
+                if(nextBlinkyX < x + 33 && nextBlinkyX + 33 > x && nextBlinkyY < y + 33 && nextBlinkyY + 33 > y) {
+                    // Blinky colisiona con Pac-Man
+                    console.log("Blinky colisionó con Pac-Man");
+                }
+            }
+        }
+    }
+    return false;
+}
+/***********************************POWER PACMAN ********************/
+let blinkyAzul = false;
+let circuloX = 100; // Posición inicial del círculo en el eje x
+let circuloY = 100; // Posición inicial del círculo en el eje y
+
+function dibujarCirculo() {
+    ctx.beginPath();
+    ctx.arc(circuloX, circuloY, 15, 0, Math.PI * 2, false);
+    ctx.fillStyle = "white";
+    ctx.fill();
+}
+
+function detectarColisionPacman() {
+    if(pacman_x < circuloX + 30 && pacman_x + 33 > circuloX && pacman_y < circuloY + 30 && pacman_y + 33 > circuloY) {
+        blinkyAzul = true;
+    }
+}
+
+function dibujarBlinky() {
+    ctx.fillStyle = blinkyAzul ? "blue" : "red";
+    ctx.fillRect(blinky_x, blinky_y, 35, 38);
+}
 /*************************** Escenario (Boundary) -> borde, limite *****************/
 
 var bWidth = 40  //El ancho de cada cuadro
@@ -119,13 +210,13 @@ let map     = [
     ['-', ' ', '-', ' ', '-', '-', ' ', '-', ' ', '-', '-', ' ', '-', ' ', '-'],
     ['-', ' ', ' ', ' ', ' ', ' ', ' ', '-', ' ', ' ', ' ', ' ', ' ', ' ', '-'],
     ['-', ' ', '-', '-', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '-', '-', ' ', '-'],
-    ['-', ' ', ' ', ' ', ' ', '-', '-', ' ', '-', '-', ' ', ' ', ' ', ' ', '-'],
-    ['-', ' ', '-', '-', ' ', '-', ' ', ' ', ' ', '-', ' ', '-', '-', ' ', '-'],
-    ['-', ' ', ' ', ' ', ' ', '-', ' ', ' ', ' ', '-', ' ', ' ', ' ', ' ', '-'],
+    ['-', ' ', ' ', ' ', ' ', '-', '-', 'f', '-', '-', ' ', ' ', ' ', ' ', '-'],
+    ['-', ' ', '-', '-', ' ', '-', 'f', 'f', 'f', '-', ' ', '-', '-', ' ', '-'],
+    ['-', ' ', ' ', ' ', ' ', '-', 'f', 'f', 'f', '-', ' ', ' ', ' ', ' ', '-'],
     ['-', ' ', '-', '-', ' ', '-', '-', '-', '-', '-', ' ', '-', '-', ' ', '-'],
     ['-', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '-'],
     ['-', ' ', '-', ' ', '-', '-', '-', '-', '-', '-', '-', ' ', '-', ' ', '-'],
-    ['-', ' ', '-', ' ', ' ', ' ', 'p', '-', ' ', ' ', ' ', ' ', '-', ' ', '-'],
+    ['-', ' ', '-', ' ', ' ', ' ', ' ', '-', ' ', ' ', ' ', ' ', '-', ' ', '-'],
     ['-', ' ', '-', ' ', '-', '-', ' ', '-', ' ', '-', '-', ' ', '-', ' ', '-'],
     ['-', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '-'],
     ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-']
@@ -133,19 +224,19 @@ let map     = [
 
 let map2 = [
     ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'],
-    ['-', ' ', ' ', ' ', '-', ' ', '-', ' ', '-', ' ', '-', ' ', ' ', ' ', '-'],
-    ['-', ' ', '-', ' ', '-', ' ', '-', ' ', '-', ' ', '-', ' ', '-', ' ', '-'],
-    ['-', ' ', '-', ' ', '-', ' ', '-', ' ', '-', ' ', '-', ' ', '-', ' ', '-'],
-    ['-', ' ', '-', ' ', '-', ' ', '-', ' ', '-', ' ', '-', ' ', '-', ' ', '-'],
-    ['-', ' ', '-', ' ', '-', '-', '-', ' ', '-', '-', '-', ' ', '-', ' ', '-'],
-    ['-', ' ', '-', ' ', '-', ' ', ' ', ' ', ' ', '-', ' ', ' ', '-', ' ', '-'],
-    ['-', ' ', '-', ' ', '-', ' ', '-', ' ', '-', '-', '-', ' ', '-', ' ', '-'],
-    ['-', ' ', '-', ' ', '-', '-', '-', '-', '-', '-', ' ', ' ', '-', ' ', '-'],
-    ['-', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '-', ' ', '-'],
-    ['-', '-', '-', '-', '-', '-', ' ', '-', '-', '-', '-', '-', '-', ' ', '-'],
+    ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'],
+    ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'],
+    ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'],
+    ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'],
+    ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'],
+    ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'],
+    ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'],
+    ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'],
+    ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'],
+    ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'],
     ['-', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '-'],
     ['-', ' ', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'],
-    ['-', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '-'],
+    ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'],
     ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-']
 ]
 
@@ -302,6 +393,10 @@ function drawBoundary(map){
                 x1 = boundaryPositionX
                 y1 = boundaryPositionY
             }
+            if(i == 4 && j == 7){
+                bx1 = boundaryPositionX
+                by1 = boundaryPositionY
+            }
             switch (symbol) {
                 case '-':
                     ctx.fillStyle = 'blue';
@@ -346,6 +441,8 @@ function detectarColision(){
                 nextY = y + avance_pacMan_y;
                 if(nextX < wallX + bWidth && nextX + 33 > wallX && nextY < wallY + bHeight && nextY + 33 > wallY) {
                     map[i][j] = 'p'
+                    score ++;
+                    
                 }
                 //map[i][j] = 'p'
             }
@@ -357,38 +454,61 @@ function detectarColision(){
 let pointPositionX
 let pointPositionY
 
+function drawRoundedRect(ctx, x, y, width, height, radius, fill, stroke) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+    if (stroke) {
+        ctx.stroke();
+    }
+    if (fill) {
+        ctx.fill();
+    }        
+}
+
 function drawPoints(map) {
     for(let i = 0; i < map.length; i++) {
         for(let j = 0; j < map[i].length; j++) {
-            // Si la celda está dentro de la "caja de fantasmas", continuar con la siguiente celda
-            if(i >= 5 && i <= 9 && j >= 5 && j <= 9) {
-                continue;
-            }
-
             // Si la celda es un pasillo, dibujar un punto
             if(map[i][j] === ' ') {
                 pointPositionX = bWidth * j + bWidth / 2;
                 pointPositionY = bHeight * i + bHeight / 2;
                 ctx.fillStyle = 'white';
-                ctx.beginPath();
-                ctx.arc(pointPositionX, pointPositionY, bWidth / 8, 0, Math.PI * 2, true); // Radio del círculo reducido a la mitad
-                ctx.fill();
+                drawRoundedRect(ctx, pointPositionX - bWidth / 8, pointPositionY - bWidth / 8, bWidth / 4, bWidth / 4, bWidth / 16, true, false);
             }
         }
     }
-} 
+}
 
 /*************************** SCORE**********************/
 var score = 0
 
 function drawScore() {
-    if(pointPositionX == x && pointPositionY == y){
-        score += 1
-        ctx.fillStyle = 'white';
-        ctx.arc(pointPositionX, pointPositionY, bWidth / 8, 0, Math.PI * 2, true); // Radio del círculo reducido a la mitad
-        ctx.fill();
-    }
+    ctx.font = '20px Arial';
+    ctx.fillStyle = 'white';
+    ctx.fillText('Score: ' + score, 500, 620);
 }
+/*************************** WINNER WINNER CHICKEN DINNER **********************/
+function noMorePoints() {
+    for(let i = 0; i < map.length; i++) {
+        for(let j = 0; j < map[i].length; j++) {
+            if(map[i][j] === ' ') {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+
 /*************************** ANIMACIÓN *****************/
 
 function draw() {
@@ -396,6 +516,7 @@ function draw() {
     drawBoundary(map)
     drawPoints(map)
     dibujaPacman()
+    drawBlinky()
     detectarColision()
     drawScore()
 
@@ -410,6 +531,11 @@ function draw() {
     }
     if(avance_pacMan_y == 1 * pasos){
         y += avance_pacMan_y
+    }
+
+    if(noMorePoints()) {
+        console.log('No more points to eat. Game over!');
+        return;
     }
 }
 
