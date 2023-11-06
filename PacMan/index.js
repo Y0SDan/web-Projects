@@ -170,27 +170,57 @@ function detectarColisionBlinky(){
     return false;
 }
 /***********************************POWER PACMAN ********************/
-let blinkyAzul = false;
 let circuloX = 100; // Posición inicial del círculo en el eje x
 let circuloY = 100; // Posición inicial del círculo en el eje y
+let circulosDibujados = 0; // Cantidad de círculos dibujados
+let Scary = false
 
-function dibujarCirculo() {
-    ctx.beginPath();
-    ctx.arc(circuloX, circuloY, 15, 0, Math.PI * 2, false);
-    ctx.fillStyle = "white";
-    ctx.fill();
-}
+let fantasmaAsustado =
+    [
+        [1,554,35,38,35,38],
+        [1,604,35,38,35,38],
+        [51,554,35,38,35,38],
+        [51,604,35,38,35,38],  
+    ]
 
-function detectarColisionPacman() {
-    if(pacman_x < circuloX + 30 && pacman_x + 33 > circuloX && pacman_y < circuloY + 30 && pacman_y + 33 > circuloY) {
-        blinkyAzul = true;
+let circulos = [];
+
+function generarCirculos() {
+    while(circulos.length < 4) {
+        let i = Math.floor(Math.random() * map.length);
+        let j = Math.floor(Math.random() * map[0].length);
+        if(map[i][j] === ' ') {
+            circulos.push({x: bWidth * j + bWidth / 2, y: bHeight * i + bHeight / 2});
+        }
     }
 }
 
-function dibujarBlinky() {
-    ctx.fillStyle = blinkyAzul ? "blue" : "red";
-    ctx.fillRect(blinky_x, blinky_y, 35, 38);
+function dibujarCirculo() {
+    ctx.fillStyle = 'white';
+    for(let circulo of circulos) {
+        ctx.beginPath();
+        ctx.arc(circulo.x, circulo.y, bWidth * 3 / 8, 0, Math.PI * 2, false); // Reduce el radio a 3/4 del tamaño original
+        ctx.fill();
+    }
 }
+
+function detectarColisionPacman() {
+    for(let i = 0; i < circulos.length; i++) {
+        let circulo = circulos[i];
+        if(x < circulo.x + 30 && x + 33 > circulo.x && y < circulo.y + 30 && y + 33 > circulo.y) {
+            circulos.splice(i, 1); // Elimina el círculo del array
+            console.log("Soy poderoso!");
+            Scary = true;
+            return true;
+        }
+    }
+}
+
+/*function dibujarFantasmaAsustado() {
+    ctx.clearRect(blinky_x,blinky_y,35,38)
+    ctx.drawImage(img,fantasmaAsustado[indice_blinky][0],fantasmaAsustado[indice_blinky][1],fantasmaAsustado[indice_blinky][2],fantasmaAsustado[indice_blinky][3],blinky_x,blinky_y,fantasmaAsustado[indice_blinky][4],fantasmaAsustado[indice_blinky][5])
+    indice_blinky = (indice_blinky + 1) % 4
+}*/
 /*************************** Escenario (Boundary) -> borde, limite *****************/
 
 var bWidth = 40  //El ancho de cada cuadro
@@ -384,6 +414,8 @@ let map10 = [
     ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-']
 ]
 
+generarCirculos() // Genera los círculos en posiciones aleatorias lo hago aqui ya que debe ser despues de los mapas
+
 function drawBoundary(map){
     map.forEach((row, i) => {
         row.forEach((symbol, j) => {
@@ -515,10 +547,15 @@ function draw() {
     ctx.clearRect(0,0,canvas.width,canvas.height)
     drawBoundary(map)
     drawPoints(map)
+    dibujarCirculo()
     dibujaPacman()
     drawBlinky()
     detectarColision()
     drawScore()
+
+    if(fantasmaAsustado) {
+        dibujarFantasmaAsustado();
+    }
 
     if(avance_pacMan_x == 1*pasos){
         x += avance_pacMan_x
